@@ -89,14 +89,40 @@
     <!-- Contact / Booking -->
     <section id="contact" class="container contact-form">
       <h3 class="section-title">تواصل / نموذج الحجز</h3>
-      <p>املأ النموذج وسيتم حفظه تلقائياً في Google Sheets (بعد نسخ النموذج إلى حسابك).</p>
+      <p>يمكنك الحجز/الإرسال بطريقتين: حفظ رسمي في Google (نسخ النموذج إلى حسابك) أو إرسال سريع عبر البريد أو واتساب.</p>
 
-      <!-- Embed Google Form: استبدل SRC برابط الـembed الخاص بالنموذج الذي ستنسخه -->
-      <div class="form-wrapper">
-        <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSdeMOCKqf3V3xX2G3v-4Gz4eG7ZVY3u0zqKcF2nK0-example/viewform?embedded=true" width="100%" height="700" frameborder="0" marginheight="0" marginwidth="0">جارٍ التحميل…</iframe>
+      <div class="contact-columns">
+        <!-- Left: Quick booking form (mail & WhatsApp) -->
+        <div class="quick-box">
+          <h4>إرسال سريع عبر الإيميل أو واتساب</h4>
+          <form id="quickBooking" class="quickBooking">
+            <label>الاسم الكامل*<input name="name" required></label>
+            <label>رقم الجوال*<input name="phone" required></label>
+            <label>البريد الإلكتروني<input name="email"></label>
+            <label>الوجهة / اسم الرحلة<input name="trip"></label>
+            <label>تاريخ المغادرة<input type="date" name="date"></label>
+            <label>عدد الأشخاص<input type="number" name="pax" min="1"></label>
+            <label>ملاحظات<textarea name="notes"></textarea></label>
+
+            <div class="quick-actions">
+              <button type="button" class="btn primary" onclick="sendEmail()">أرسل عبر الإيميل</button>
+              <button type="button" class="btn secondary" onclick="sendWhatsApp()">أرسل عبر واتساب</button>
+              <button type="button" class="btn" onclick="openGoogleForm()" style="background:#444;color:#fff;margin-left:8px">احفظ في Google</button>
+            </div>
+          </form>
+          <p class="small">ملاحظة: إرسال الإيميل يفتح تطبيق البريد على جهازك. واتساب يفتح محادثة مع الرقم: +967 77 700 4748</p>
+        </div>
+
+        <!-- Right: Google Form embed (optional) -->
+        <div class="form-embed">
+          <h4>النموذج الرسمي (لحفظ الردود في Google Sheets)</h4>
+          <p>قم بنسخ النموذج إلى حسابك ليتخزن تلقائيًا في Google Sheets. أو اضغط على "احفظ في Google" أعلاه لفتح النموذج.</p>
+          <div class="form-wrapper">
+            <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSdeMOCKqf3V3xX2G3v-4Gz4eG7ZVY3u0zqKcF2nK0-example/viewform?embedded=true" width="100%" height="480" frameborder="0" marginheight="0" marginwidth="0">جارٍ التحميل…</iframe>
+          </div>
+        </div>
       </div>
 
-      <p class="note">إذا رغبت نموذجاً بدون صفحة Google، أخبرني لأزوّدك صيغة HTML مع Google Apps Script للحفظ والإشعار.</p>
     </section>
   </main>
 
@@ -116,6 +142,38 @@
 
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
+
+    function serialize(form){
+      const fd = new FormData(form);
+      const obj = {};
+      for(const [k,v] of fd.entries()) obj[k]=v;
+      return obj;
+    }
+
+    function sendEmail(){
+      const f = document.getElementById('quickBooking');
+      const d = serialize(f);
+      const subject = encodeURIComponent('طلب حجز — مكتب العباد');
+      const body = encodeURIComponent(
+`الاسم: ${d.name}\nالجوال: ${d.phone}\nالإيميل: ${d.email || '-'}\nالرحلة/الوجهة: ${d.trip || '-'}\nتاريخ المغادرة: ${d.date || '-'}\nعدد الأشخاص: ${d.pax || '-'}\nملاحظات: ${d.notes || '-'}\n`
+      );
+      window.location.href = `mailto:abdalluh11houssien@gmail.com?subject=${subject}&body=${body}`;
+    }
+
+    function sendWhatsApp(){
+      const f = document.getElementById('quickBooking');
+      const d = serialize(f);
+      const text = encodeURIComponent(
+`طلب حجز — مكتب العباد\nالاسم: ${d.name}\nالجوال: ${d.phone}\nالرحلة: ${d.trip || '-'}\nالتاريخ: ${d.date || '-'}\nالأشخاص: ${d.pax || '-'}\nملاحظات: ${d.notes || '-'}\n`
+      );
+      // رقمك بالصيغة الدولية بدون + وبدون مسافات: 967777004744
+      window.open(`https://wa.me/967777004744?text=${text}`, '_blank');
+    }
+
+    function openGoogleForm(){
+      // ضع هنا رابط نموذج Google Form الخاص بك (عرض/نسخ)
+      window.open('https://docs.google.com/forms/d/e/1FAIpQLSdeMOCKqf3V3xX2G3v-4Gz4eG7ZVY3u0zqKcF2nK0-example/viewform','_blank');
+    }
   </script>
 </body>
 </html>
